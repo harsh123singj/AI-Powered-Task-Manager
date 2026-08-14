@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import ReacktMarkdown from "react-markdown";
+import ReactMarkdown from "react-markdown";
+import BACKEND_URL from "../api/url";
+
 const AIAssistant = () => {
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState([]);
@@ -13,7 +15,6 @@ const AIAssistant = () => {
 
         const userMessage = input;
 
-        // Add user message
         setMessages((prev) => [
             ...prev,
             {
@@ -22,16 +23,14 @@ const AIAssistant = () => {
             }
         ]);
 
-        // Clear input
         setInput("");
+        setLoading(true);
 
         try {
-            setLoading(true);
-
             const token = localStorage.getItem("token");
 
             const response = await axios.post(
-                "http://localhost:4001/api/ai/test",
+                `${BACKEND_URL}/api/ai/test`,
                 {
                     text: userMessage
                 },
@@ -42,7 +41,6 @@ const AIAssistant = () => {
                 }
             );
 
-            // Add AI response
             setMessages((prev) => [
                 ...prev,
                 {
@@ -52,7 +50,7 @@ const AIAssistant = () => {
             ]);
 
         } catch (error) {
-            console.error(error);
+            console.error("AI Error:", error);
 
             setMessages((prev) => [
                 ...prev,
@@ -71,7 +69,6 @@ const AIAssistant = () => {
     return (
         <div className="fixed bottom-24 right-6 z-[9998] w-[380px]">
 
-            {/* Chat Box */}
             <div className="flex h-[550px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
 
                 {/* Header */}
@@ -89,13 +86,11 @@ const AIAssistant = () => {
                             </h2>
 
                             <div className="mt-0.5 flex items-center gap-1.5">
-
                                 <span className="h-2 w-2 rounded-full bg-emerald-200"></span>
 
                                 <span className="text-xs text-emerald-50">
                                     AI Assistant
                                 </span>
-
                             </div>
                         </div>
 
@@ -131,7 +126,6 @@ const AIAssistant = () => {
 
                         message.role === "user" ? (
 
-                            /* User message */
                             <div
                                 key={index}
                                 className="flex justify-end"
@@ -149,7 +143,6 @@ const AIAssistant = () => {
 
                         ) : (
 
-                            /* AI message */
                             <div
                                 key={index}
                                 className="flex items-start gap-2.5"
@@ -202,7 +195,7 @@ const AIAssistant = () => {
                 </div>
 
 
-                {/* Input Area */}
+                {/* Input */}
                 <div className="border-t border-gray-200 bg-white p-3">
 
                     <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-1.5 transition focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100">
@@ -230,6 +223,7 @@ const AIAssistant = () => {
                         </button>
 
                     </div>
+
                 </div>
 
             </div>

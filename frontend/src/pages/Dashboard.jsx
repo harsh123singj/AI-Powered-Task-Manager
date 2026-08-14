@@ -4,16 +4,17 @@ import Loader from "../components/Loader";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import BACKEND_URL from "../api/url";
 
 const Dashboard = () => {
     const [tasks, setTask] = useState([]);
-    const userName = localStorage.getItem("userName") || "User"
+    const userName = localStorage.getItem("userName") || "User";
 
     const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("")
-    const [status, setStatus] = useState("pending")
-    const [priority, setPriority] = useState("medium")
-    const [dueDate, setDueDate] = useState("")
+    const [description, setDescription] = useState("");
+    const [status, setStatus] = useState("pending");
+    const [priority, setPriority] = useState("medium");
+    const [dueDate, setDueDate] = useState("");
     const [editTaskId, setEditTaskId] = useState(null);
     const [showAddTask, setShowAddTask] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -23,9 +24,6 @@ const Dashboard = () => {
     const [statusFilter, setStatusFilter] = useState("all");
     const [priorityFilter, setPriorityFilter] = useState("all");
     const [sortBy, setSortBy] = useState("newest");
-
-
-
 
     const filteredTasks = tasks.filter(task => {
         const matchesSearch =
@@ -70,8 +68,6 @@ const Dashboard = () => {
         return 0;
     });
 
-
-
     const resetForm = () => {
         setTitle("");
         setDescription("");
@@ -84,13 +80,12 @@ const Dashboard = () => {
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => {
-                setMessage("")
+                setMessage("");
             }, 3000);
 
             return () => clearTimeout(timer);
         }
     }, [message]);
-
 
     useEffect(() => {
         if (errorMessage) {
@@ -102,14 +97,14 @@ const Dashboard = () => {
         }
     }, [errorMessage]);
 
-
+    // Fetch tasks
     useEffect(() => {
         const token = localStorage.getItem("token");
 
         const fetchTasks = async () => {
             try {
                 const response = await axios.get(
-                    "http://localhost:4001/api/tasks",
+                    `${BACKEND_URL}/api/tasks`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
@@ -130,9 +125,9 @@ const Dashboard = () => {
 
     }, []);
 
+    // Create task
     const handleCreateTask = async (e) => {
         e.preventDefault();
-
 
         const token = localStorage.getItem("token");
 
@@ -140,18 +135,20 @@ const Dashboard = () => {
 
         try {
             const response = await axios.post(
-                "http://localhost:4001/api/tasks", {
-                title,
-                description,
-                status,
-                priority,
-                dueDate
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+                `${BACKEND_URL}/api/tasks`,
+                {
+                    title,
+                    description,
+                    status,
+                    priority,
+                    dueDate
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
-            }
-            )
+            );
 
             setTask(prevTasks => [response.data, ...prevTasks]);
             setMessage("Task created successfully!");
@@ -159,49 +156,43 @@ const Dashboard = () => {
 
             resetForm();
 
-
-
-
-        }
-        catch (error) {
+        } catch (error) {
             setErrorMessage(
                 error.response?.data?.message || "Something went wrong"
             );
+        } finally {
+            setLoading(false);
         }
-        finally {
-            setLoading(false)
-        }
-    }
+    };
 
+    // Delete task
     const handleDeleteTask = async (taskId) => {
         const token = localStorage.getItem("token");
 
         try {
-            const response = await axios.delete(
-                `http://localhost:4001/api/tasks/${taskId}`,
+            await axios.delete(
+                `${BACKEND_URL}/api/tasks/${taskId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 }
-
-            )
+            );
 
             setTask(prevTasks =>
                 prevTasks.filter(task => task._id !== taskId)
-            )
+            );
 
             setMessage("Task Deleted successfully!");
 
-
+        } catch (error) {
+            setErrorMessage(
+                error.response?.data?.message || "Something Went Wrong"
+            );
         }
-        catch (error) {
-            setErrorMessage(error.response?.data?.message || "Something Went Wrong");
+    };
 
-        }
-    }
-
-
+    // Edit task
     const handleEdit = (task) => {
         setEditTaskId(task._id);
 
@@ -219,8 +210,7 @@ const Dashboard = () => {
         setShowAddTask(true);
     };
 
-
-
+    // Update task
     const handleUpdateTask = async (e) => {
         e.preventDefault();
 
@@ -230,7 +220,7 @@ const Dashboard = () => {
 
         try {
             const response = await axios.put(
-                `http://localhost:4001/api/tasks/${editTaskId}`,
+                `${BACKEND_URL}/api/tasks/${editTaskId}`,
                 {
                     title,
                     description,
@@ -258,14 +248,13 @@ const Dashboard = () => {
             resetForm();
 
         } catch (error) {
-            setErrorMessage(error.response?.data?.message || "Something Went Wrong");
-        }
-        finally {
-            setLoading(false)
+            setErrorMessage(
+                error.response?.data?.message || "Something Went Wrong"
+            );
+        } finally {
+            setLoading(false);
         }
     };
-
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
@@ -293,12 +282,14 @@ const Dashboard = () => {
 
                     <button
                         onClick={() => setShowAddTask(true)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-3 rounded-xl shadow-md transition">
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-3 rounded-xl shadow-md transition"
+                    >
                         + Add Task
                     </button>
 
                 </div>
 
+                {/* Error Message */}
                 {errorMessage && (
                     <div className="fixed top-6 right-6 z-[100] flex items-center gap-3 bg-white border border-red-200 shadow-xl rounded-xl px-5 py-4 min-w-[280px]">
 
@@ -326,8 +317,9 @@ const Dashboard = () => {
                     </div>
                 )}
 
+                {/* Success Message */}
                 {message && (
-                    <div className="fixed top-6 right-6 z-[100] flex items-center gap-3 bg-white border border-emerald-200 shadow-xl rounded-xl px-5 py-4 min-w-[280px] animate-[slideIn_0.3s_ease-out]">
+                    <div className="fixed top-6 right-6 z-[100] flex items-center gap-3 bg-white border border-emerald-200 shadow-xl rounded-xl px-5 py-4 min-w-[280px]">
 
                         <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
                             ✓
@@ -353,11 +345,9 @@ const Dashboard = () => {
                     </div>
                 )}
 
-
                 {/* Statistics */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
 
-                    {/* Total */}
                     <div className="bg-white/80 backdrop-blur-sm border border-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
 
                         <div className="flex items-center justify-between mb-5">
@@ -382,8 +372,6 @@ const Dashboard = () => {
 
                     </div>
 
-
-                    {/* Pending */}
                     <div className="bg-white/80 backdrop-blur-sm border border-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
 
                         <div className="flex items-center justify-between mb-5">
@@ -408,8 +396,6 @@ const Dashboard = () => {
 
                     </div>
 
-
-                    {/* Completed */}
                     <div className="bg-white/80 backdrop-blur-sm border border-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
 
                         <div className="flex items-center justify-between mb-5">
@@ -436,7 +422,6 @@ const Dashboard = () => {
 
                 </div>
 
-
                 {/* Tasks Section */}
                 <section className="bg-white/80 backdrop-blur-sm border border-white rounded-2xl shadow-sm p-6 md:p-8">
 
@@ -453,7 +438,9 @@ const Dashboard = () => {
                         </div>
 
                         <div className="relative">
+
                             <div className="flex flex-col sm:flex-row gap-3">
+
                                 <input
                                     type="text"
                                     value={search}
@@ -472,6 +459,7 @@ const Dashboard = () => {
                                     <option value="in-progress">In Progress</option>
                                     <option value="completed">Completed</option>
                                 </select>
+
                                 <select
                                     value={priorityFilter}
                                     onChange={(e) => setPriorityFilter(e.target.value)}
@@ -482,6 +470,7 @@ const Dashboard = () => {
                                     <option value="medium">Medium</option>
                                     <option value="high">High</option>
                                 </select>
+
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
@@ -500,7 +489,6 @@ const Dashboard = () => {
                     </div>
 
                     {/* Empty State */}
-
                     {filteredTasks.length === 0 ? (
 
                         <div className="min-h-[250px] flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200 rounded-xl">
@@ -510,7 +498,9 @@ const Dashboard = () => {
                             </div>
 
                             <h3 className="text-lg font-semibold text-gray-800">
-                                {tasks.length === 0 ? "No tasks yet" : "No matching tasks"}
+                                {tasks.length === 0
+                                    ? "No tasks yet"
+                                    : "No matching tasks"}
                             </h3>
 
                             <p className="text-gray-500 text-sm mt-1 mb-5">
@@ -533,16 +523,16 @@ const Dashboard = () => {
                     ) : (
 
                         <div className="space-y-4">
+
                             {sortedTasks.map((task) => (
+
                                 <div
                                     key={task._id}
                                     className="group bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                                 >
 
-                                    {/* Top Row */}
                                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 
-                                        {/* Task Info */}
                                         <div className="flex-1">
 
                                             <div className="flex items-center gap-3 mb-2">
@@ -551,14 +541,14 @@ const Dashboard = () => {
                                                     {task.title}
                                                 </h3>
 
-                                                {/* Status */}
                                                 <span
-                                                    className={`text-xs font-semibold px-3 py-1 rounded-full ${task.status === "completed"
-                                                        ? "bg-green-100 text-green-700"
-                                                        : task.status === "in-progress"
-                                                            ? "bg-blue-100 text-blue-700"
-                                                            : "bg-amber-100 text-amber-700"
-                                                        }`}
+                                                    className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                                                        task.status === "completed"
+                                                            ? "bg-green-100 text-green-700"
+                                                            : task.status === "in-progress"
+                                                                ? "bg-blue-100 text-blue-700"
+                                                                : "bg-amber-100 text-amber-700"
+                                                    }`}
                                                 >
                                                     {task.status}
                                                 </span>
@@ -571,25 +561,22 @@ const Dashboard = () => {
 
                                         </div>
 
-                                        {/* Priority */}
                                         <span
-                                            className={`text-xs font-bold px-3 py-1.5 rounded-lg ${task.priority === "high"
-                                                ? "bg-red-100 text-red-600"
-                                                : task.priority === "medium"
-                                                    ? "bg-orange-100 text-orange-600"
-                                                    : "bg-emerald-100 text-emerald-600"
-                                                }`}
+                                            className={`text-xs font-bold px-3 py-1.5 rounded-lg ${
+                                                task.priority === "high"
+                                                    ? "bg-red-100 text-red-600"
+                                                    : task.priority === "medium"
+                                                        ? "bg-orange-100 text-orange-600"
+                                                        : "bg-emerald-100 text-emerald-600"
+                                            }`}
                                         >
                                             {task.priority.toUpperCase()}
                                         </span>
 
                                     </div>
 
-
-                                    {/* Bottom Row */}
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-5 pt-4 border-t border-gray-100">
 
-                                        {/* Due Date */}
                                         <div className="flex items-center gap-2 text-sm text-gray-500">
                                             <span>📅</span>
 
@@ -600,8 +587,6 @@ const Dashboard = () => {
                                             </span>
                                         </div>
 
-
-                                        {/* Actions */}
                                         <div className="flex items-center gap-2">
 
                                             <button
@@ -623,7 +608,9 @@ const Dashboard = () => {
                                     </div>
 
                                 </div>
+
                             ))}
+
                         </div>
 
                     )}
@@ -632,18 +619,19 @@ const Dashboard = () => {
 
             </main>
 
-
+            {/* Add / Edit Task Modal */}
             {showAddTask && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
 
                     <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
 
-                        {/* Header */}
                         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
 
                             <div>
                                 <h2 className="text-xl font-bold text-gray-900">
-                                    {editTaskId ? "Update your Task" : "Create New Task"}
+                                    {editTaskId
+                                        ? "Update your Task"
+                                        : "Create New Task"}
                                 </h2>
 
                                 <p className="text-sm text-gray-500 mt-1">
@@ -664,11 +652,15 @@ const Dashboard = () => {
 
                         </div>
 
+                        <form
+                            onSubmit={
+                                editTaskId
+                                    ? handleUpdateTask
+                                    : handleCreateTask
+                            }
+                            className="p-6"
+                        >
 
-                        {/* Form */}
-                        <form onSubmit={editTaskId ? handleUpdateTask : handleCreateTask} className="p-6">
-
-                            {/* Title */}
                             <div className="mb-4">
 
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -685,8 +677,6 @@ const Dashboard = () => {
 
                             </div>
 
-
-                            {/* Description */}
                             <div className="mb-4">
 
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -695,7 +685,9 @@ const Dashboard = () => {
 
                                 <textarea
                                     value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
+                                    onChange={(e) =>
+                                        setDescription(e.target.value)
+                                    }
                                     rows="3"
                                     placeholder="Describe your task..."
                                     className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none resize-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
@@ -703,11 +695,8 @@ const Dashboard = () => {
 
                             </div>
 
-
-                            {/* Priority + Status */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
 
-                                {/* Priority */}
                                 <div>
 
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -716,7 +705,9 @@ const Dashboard = () => {
 
                                     <select
                                         value={priority}
-                                        onChange={(e) => setPriority(e.target.value)}
+                                        onChange={(e) =>
+                                            setPriority(e.target.value)
+                                        }
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none bg-white focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
                                     >
                                         <option value="low">Low</option>
@@ -726,8 +717,6 @@ const Dashboard = () => {
 
                                 </div>
 
-
-                                {/* Status */}
                                 <div>
 
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -736,20 +725,24 @@ const Dashboard = () => {
 
                                     <select
                                         value={status}
-                                        onChange={(e) => setStatus(e.target.value)}
+                                        onChange={(e) =>
+                                            setStatus(e.target.value)
+                                        }
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none bg-white focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
                                     >
                                         <option value="pending">Pending</option>
-                                        <option value="in-progress">In Progress</option>
-                                        <option value="completed">Completed</option>
+                                        <option value="in-progress">
+                                            In Progress
+                                        </option>
+                                        <option value="completed">
+                                            Completed
+                                        </option>
                                     </select>
 
                                 </div>
 
                             </div>
 
-
-                            {/* Due Date */}
                             <div className="mb-6">
 
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -758,15 +751,15 @@ const Dashboard = () => {
 
                                 <input
                                     value={dueDate}
-                                    onChange={(e) => setDueDate(e.target.value)}
+                                    onChange={(e) =>
+                                        setDueDate(e.target.value)
+                                    }
                                     type="date"
                                     className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
                                 />
 
                             </div>
 
-
-                            {/* Buttons */}
                             <div className="flex justify-end gap-3">
 
                                 <button
@@ -774,7 +767,8 @@ const Dashboard = () => {
                                     onClick={() => {
                                         setShowAddTask(false);
                                         resetForm();
-                                    }} className="px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition"
+                                    }}
+                                    className="px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition"
                                 >
                                     Cancel
                                 </button>
@@ -782,8 +776,13 @@ const Dashboard = () => {
                                 <button
                                     disabled={loading}
                                     type="submit"
-                                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md transition flex items-center justify-center"                                >
-                                    {loading ? <Loader /> : editTaskId ? "update Task" : "Create Task"}
+                                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md transition flex items-center justify-center"
+                                >
+                                    {loading
+                                        ? <Loader />
+                                        : editTaskId
+                                            ? "Update Task"
+                                            : "Create Task"}
                                 </button>
 
                             </div>

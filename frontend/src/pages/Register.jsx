@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import BACKEND_URL from "../api/url";
 
 const Register = () => {
     const [name, setName] = useState("")
@@ -21,7 +22,7 @@ const Register = () => {
         }
         try{
         await axios.post(
-            "http://localhost:4001/api/auth/register",
+            `${BACKEND_URL}/api/auth/register`,
             {
                 name,
                 email,

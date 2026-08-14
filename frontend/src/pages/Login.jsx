@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import BACKEND_URL from "../api/url";
 
 
 const Login = () => {
@@ -16,7 +17,7 @@ const handleSubmit = async (e) => {
 
     try {
         const response = await axios.post(
-            "http://localhost:4001/api/auth/login",
+            `${BACKEND_URL}/api/auth/login`,
             {
                 email,
                 password
@@ -115,9 +116,7 @@ const handleSubmit = async (e) => {
             <div className="flex items-center gap-3 my-5">
               <div className="flex-1 h-px bg-gray-200"></div>
 
-              <span className="text-sm text-gray-400">
-                or continue with
-              </span>
+             
 
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
@@ -125,17 +124,6 @@ const handleSubmit = async (e) => {
             {/* Social buttons */}
             <div className="flex justify-center gap-3">
 
-              <button className="w-10 h-10 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                G
-              </button>
-
-              <button className="w-10 h-10 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                f
-              </button>
-
-              <button className="w-10 h-10 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                GH
-              </button>
 
             </div>
 
