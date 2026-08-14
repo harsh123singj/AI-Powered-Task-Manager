@@ -1,0 +1,241 @@
+import React, { useState } from "react";
+import axios from "axios";
+import ReacktMarkdown from "react-markdown";
+const AIAssistant = () => {
+    const [input, setInput] = useState("");
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!input.trim() || loading) return;
+
+        const userMessage = input;
+
+        // Add user message
+        setMessages((prev) => [
+            ...prev,
+            {
+                role: "user",
+                content: userMessage
+            }
+        ]);
+
+        // Clear input
+        setInput("");
+
+        try {
+            setLoading(true);
+
+            const token = localStorage.getItem("token");
+
+            const response = await axios.post(
+                "http://localhost:4001/api/ai/test",
+                {
+                    text: userMessage
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            // Add AI response
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "ai",
+                    content: response.data
+                }
+            ]);
+
+        } catch (error) {
+            console.error(error);
+
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "ai",
+                    content:
+                        "Sorry, something went wrong. Please try again."
+                }
+            ]);
+
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed bottom-24 right-6 z-[9998] w-[380px]">
+
+            {/* Chat Box */}
+            <div className="flex h-[550px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
+
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-emerald-100 bg-emerald-600 px-5 py-4">
+
+                    <div className="flex items-center gap-3">
+
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg">
+                            🤖
+                        </div>
+
+                        <div>
+                            <h2 className="font-semibold text-white">
+                                AI Task Assistant
+                            </h2>
+
+                            <div className="mt-0.5 flex items-center gap-1.5">
+
+                                <span className="h-2 w-2 rounded-full bg-emerald-200"></span>
+
+                                <span className="text-xs text-emerald-50">
+                                    AI Assistant
+                                </span>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {/* Messages */}
+                <div className="flex-1 space-y-5 overflow-y-auto bg-gray-50 p-4">
+
+                    {/* Initial AI message */}
+                    <div className="flex items-start gap-2.5">
+
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs text-white">
+                            AI
+                        </div>
+
+                        <div className="max-w-[78%] rounded-2xl rounded-tl-sm bg-white px-3.5 py-3 shadow-sm">
+
+                            <p className="text-sm leading-5 text-gray-700">
+                                Hi! I'm your AI task assistant. Ask me
+                                anything about your tasks.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* Dynamic messages */}
+                    {messages.map((message, index) => (
+
+                        message.role === "user" ? (
+
+                            /* User message */
+                            <div
+                                key={index}
+                                className="flex justify-end"
+                            >
+
+                                <div className="max-w-[78%] rounded-2xl rounded-tr-sm bg-emerald-600 px-3.5 py-3 text-white shadow-sm">
+
+                                    <p className="text-sm leading-5">
+                                        {message.content}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        ) : (
+
+                            /* AI message */
+                            <div
+                                key={index}
+                                className="flex items-start gap-2.5"
+                            >
+
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs text-white">
+                                    AI
+                                </div>
+
+                                <div className="max-w-[78%] rounded-2xl rounded-tl-sm bg-white px-3.5 py-3 shadow-sm">
+
+                                    <div className="prose prose-sm max-w-none text-gray-700">
+                                        <ReactMarkdown>
+                                            {message.content}
+                                        </ReactMarkdown>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        )
+
+                    ))}
+
+
+                    {/* Loading */}
+                    {loading && (
+
+                        <div className="flex items-start gap-2.5">
+
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs text-white">
+                                AI
+                            </div>
+
+                            <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-white px-4 py-4 shadow-sm">
+
+                                <span className="h-2 w-2 animate-bounce rounded-full bg-emerald-500"></span>
+
+                                <span className="h-2 w-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:150ms]"></span>
+
+                                <span className="h-2 w-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:300ms]"></span>
+
+                            </div>
+
+                        </div>
+
+                    )}
+
+                </div>
+
+
+                {/* Input Area */}
+                <div className="border-t border-gray-200 bg-white p-3">
+
+                    <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-1.5 transition focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100">
+
+                        <input
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    handleSubmit(e);
+                                }
+                            }}
+                            type="text"
+                            placeholder="Ask about your tasks..."
+                            disabled={loading}
+                            className="flex-1 bg-transparent px-3 py-2 text-sm text-gray-700 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
+                        />
+
+                        <button
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {loading ? "..." : "Send"}
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    );
+};
+
+export default AIAssistant;

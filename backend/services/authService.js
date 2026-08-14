@@ -19,22 +19,26 @@ export const createUser = async (userData) => {
 // Login LOgic here
 
 export const loginUser = async (userData) => {
-    // search for entered email
+    // Search for entered email
     const loggedinUser = await User.findOne({
         email: userData.email
     }).select("+password");
-    
+
     if (!loggedinUser) {
-        throw new Error("No user Found with the mail")
+        throw new Error("No user Found with the mail");
     }
-    // check if password is correct
-    const isPasswordCorrect = await bcrypt.compare(userData.password, loggedinUser.password)
+
+    // Check password
+    const isPasswordCorrect = await bcrypt.compare(
+        userData.password,
+        loggedinUser.password
+    );
+
     if (!isPasswordCorrect) {
-        throw new Error("Wrong Password")
+        throw new Error("Wrong Password");
     }
 
-    // assign token to user using jwt
-
+    // Create JWT
     const token = jwt.sign(
         { userId: loggedinUser._id },
         process.env.JWT_SECRET,
@@ -43,6 +47,7 @@ export const loginUser = async (userData) => {
 
     return {
         token,
-        userId: loggedinUser._id
+        userId: loggedinUser._id,
+        name: loggedinUser.name
     };
-}
+};

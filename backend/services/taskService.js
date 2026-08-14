@@ -1,12 +1,25 @@
 import Task from "../models/Task.model.js";
+import { generateEmbedding } from "./embeddingService.js";
 
 // Create Tasks Logic Here
 export const createTask = async (taskData, userId) => {
+
+       const tasktext =`
+    Title : ${taskData.title}
+    Descrption :${taskData.description}
+    Status:${taskData.status}
+    Priority:${taskData.priority}
+    Due Date :${taskData.dueDate || "No due date"}`;
+
+    const embedding = await generateEmbedding(tasktext);
+
     const newTask = new Task({
         ...taskData,
-        user: userId
+        user: userId,
+        embedding
     });
 
+ 
     const savedTask = await newTask.save();
 
     return savedTask;

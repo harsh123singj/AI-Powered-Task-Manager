@@ -1,55 +1,77 @@
-import express from "express"
+import "dotenv/config";
+import express from "express";
 import cors from "cors";
-import dotenv from "dotenv"
+
 import connectDB from "./config/db.js";
+
 import loggerMiddleware from "./middleware/loggerMiddleware.js";
 import requestCheck from "./middleware/requestCheck.js";
 import secondMiddleware from "./middleware/secondMiddleware.js";
-import errorMiddleware  from "./middleware/errorMiddleware.js";
+import errorMiddleware from "./middleware/errorMiddleware.js";
+
 import taskrouter from "./routes/taskRoutes.js";
-import authrouter from "./routes/authRoutes.js"
+import authrouter from "./routes/authRoutes.js";
+import aiRouter from "./routes/aiRoutes.js";
 
-dotenv.config();
 
-const app= express();
+const app = express();
+
 const PORT = process.env.PORT || 4002;
+
 
 // Global middleware
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 app.use(loggerMiddleware);
+
+
+// Routes
 
 app.use("/api/tasks", taskrouter);
 app.use("/api/auth", authrouter);
-// router middleware
-
-// error-handling middleware
-
-// connect to MongoDB
-connectDB();
+app.use("/api/ai", aiRouter);
 
 
-// test route
-app.get("/", (req , res) =>{
+// Test routes
+
+app.get("/", (req, res) => {
     res.json({
-        message :"Task manangmnet APP is runnig"
+        message: "Task management APP is running"
     });
 });
 
-app.get("/task", requestCheck,secondMiddleware,(req, res)=>{
+app.get("/task", requestCheck, secondMiddleware, (req, res) => {
     res.status(200).json({
-        message:"Task route"
-    })
-})
+        message: "Task route"
+    });
+});
 
-app.get("/error", (req, res,next)=>{
-    const error= new Error("Something went wrong");
+app.get("/error", (req, res, next) => {
+    const error = new Error("Something went wrong");
     next(error);
-})
+});
+
+
+// Error handling middleware
 
 app.use(errorMiddleware);
 
-app.listen(PORT, ()=>{
-    console.log(`Server running on port ${PORT}`);
-})
+
+// Start server after MongoDB connection
+
+const startServer = async () => {
+    try {
+        await connectDB();
+
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+
+    } catch (error) {
+        console.error("Failed to start server:", error);
+        process.exit(1);
+    }
+};
+
+startServer();

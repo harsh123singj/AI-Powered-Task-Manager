@@ -3,6 +3,7 @@ import{ useNavigate} from "react-router-dom"
 
 const Navbar = () => {
 
+  const userName = localStorage.getItem("userName")
 
   const navigate = useNavigate();
   const handleLogout =()=>{
@@ -20,12 +21,12 @@ const Navbar = () => {
           </div>
 
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="cursor-pointer text-xl font-bold text-gray-900">
               Task Manager
             </h1>
 
             <p className="text-xs text-gray-500">
-              Stay organized. Stay productive.
+              Keep your Task Managed.
             </p>
           </div>
         </div>
@@ -35,7 +36,7 @@ const Navbar = () => {
 
           <div className="hidden sm:block text-right">
             <p className="text-sm font-semibold text-gray-800">
-              Welcome, Harsh
+              Welcome, {userName}
             </p>
 
             <p className="text-xs text-gray-500">

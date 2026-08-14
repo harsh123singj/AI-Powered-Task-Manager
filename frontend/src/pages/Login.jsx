@@ -5,25 +5,35 @@ import axios from 'axios';
 
 
 const Login = () => {
-    const[email , setEmail] = useState("");
-    const[password , setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const navigate= useNavigate();
+  const navigate = useNavigate();
 
 
-    const handleSubmit =async (e)=>{
-        e.preventDefault();
-        const response= await axios.post(
-            "http://localhost:4001/api/auth/login",{
+const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+        const response = await axios.post(
+            "http://localhost:4001/api/auth/login",
+            {
                 email,
                 password
             }
-        )
+        );
+
+        console.log("Logged in as:", response.data.name);
+
         localStorage.setItem("token", response.data.token);
-        navigate("/dashboard")
-        console.log(response.data);
-        
+        localStorage.setItem("userName", response.data.name);
+
+        navigate("/dashboard");
+
+    } catch (error) {
+        console.error(error);
     }
+};
 
 
   return (
@@ -45,59 +55,59 @@ const Login = () => {
             </p>
 
             <form onSubmit={handleSubmit}>
-            {/* Email */}
-            <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email
-              </label>
+              {/* Email */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email
+                </label>
 
-              <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                placeholder="Enter your email"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
-
-              <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-                type="password"
-                placeholder="Enter your password"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
-              />
-            </div>
-
-            {/* Options */}
-            <div className="flex items-center justify-between mb-5">
-
-              <label className="flex items-center gap-2 text-sm text-gray-600">
                 <input
-                  type="checkbox"
-                  className="w-4 h-4 accent-emerald-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
                 />
-                Remember me
-              </label>
+              </div>
 
-              <button className="text-sm text-emerald-600 font-medium hover:text-emerald-700">
-                Forgot password?
+              {/* Password */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password
+                </label>
+
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition"
+                />
+              </div>
+
+              {/* Options */}
+              <div className="flex items-center justify-between mb-5">
+
+                <label className="flex items-center gap-2 text-sm text-gray-600">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 accent-emerald-500"
+                  />
+                  Remember me
+                </label>
+
+                <button className="text-sm text-emerald-600 font-medium hover:text-emerald-700">
+                  Forgot password?
+                </button>
+
+              </div>
+
+              {/* Login Button */}
+              <button
+                type='submit'
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition shadow-md">
+                Sign In
               </button>
-
-            </div>
-
-            {/* Login Button */}
-            <button 
-            type='submit'
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition shadow-md">
-              Sign In
-            </button>
 
             </form>
 

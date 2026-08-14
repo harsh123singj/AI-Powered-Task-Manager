@@ -7,6 +7,7 @@ import axios from "axios";
 
 const Dashboard = () => {
     const [tasks, setTask] = useState([]);
+    const userName = localStorage.getItem("userName") || "User"
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("")
@@ -282,7 +283,7 @@ const Dashboard = () => {
                         </p>
 
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-                            Good morning, Harsh 👋
+                            Good morning, {userName}
                         </h1>
 
                         <p className="text-gray-500 mt-2">

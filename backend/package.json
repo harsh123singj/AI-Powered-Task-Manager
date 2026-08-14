@@ -7,9 +7,14 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "start":"node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@google/genai": "^2.17.0",
+    "@huggingface/transformers": "^4.2.0",
+    "@langchain/core": "^1.2.6",
+    "@langchain/google-genai": "^2.2.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
